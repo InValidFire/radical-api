@@ -1,0 +1,13 @@
+[Unit]
+Description=API for my habit tracking system.
+After=network.target
+StartLimitIntervalSec=0
+
+# need to setup custom user for api.
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=
+ExecStart=/usr/bin/env python main.py
+
