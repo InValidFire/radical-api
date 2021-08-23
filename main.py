@@ -1,13 +1,6 @@
-import subprocess
+import sys
 
-script = "tracker_api/api.py"
+from core.wrapper import Wrapper
 
-while True:
-    try:
-        subprocess.run(f"python {script}", check=True)
-    except subprocess.CalledProcessError as err:
-        if err.returncode == -1:
-            print("Stopping.")
-            break
-        if err.returncode == -2:
-            print("Run update check!")
+api = Wrapper(['gunicorn', "-k", "uvicorn.workers.UvicornWorker", "--log-config", "log.conf", 'api:api'], sys.stdout)
+api.start()
