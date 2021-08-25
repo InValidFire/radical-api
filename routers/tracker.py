@@ -19,8 +19,9 @@ def list_points(name: str, access_token: APIKey = Depends(get_api_key)):
 
 
 @router.get("/tracker/points/add")
-def add_point(name: str, value: int, date_str: str = datetime.now().isoformat(),
-              access_token: APIKey = Depends(get_api_key)):
+def add_point(name: str, value: int, date_str: str = None, access_token: APIKey = Depends(get_api_key)):
+    if date_str is None:
+        date_str = datetime.now().isoformat()
     try:
         tracker = Tracker.from_data(name)
     except FileNotFoundError:
