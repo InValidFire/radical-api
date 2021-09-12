@@ -1,26 +1,18 @@
 import json
-from datetime import datetime
-from json.encoder import JSONEncoder
+from datetime import datetime, timedelta
+from fastapi.encoders import jsonable_encoder
 from pathlib import Path
 
 DATA_DIR = Path.home().joinpath(".tracker_api/trackers")
 
 
 def object_hook(dct):
-    if "date_str" in dct:
+    if "datetime" in dct:
+        return TrackerPoint(dct["datetime"], dct["value"])
+    if "date_str" in dct:  # old format
         return TrackerPoint(dct["date_str"], dct["value"])
     if "name" in dct:
         return Tracker(dct["name"], dct["points"])
-
-
-class TrackerEncoder(JSONEncoder):
-    def default(self, o):
-        if isinstance(o, Tracker):
-            return dict(name=o.name, points=o.points)
-        elif isinstance(o, TrackerPoint):
-            return dict(date_str=o.datetime.isoformat(), value=o.value)
-        else:
-            return json.JSONEncoder.default(self, o)
 
 
 class TrackerPoint:
@@ -46,16 +38,14 @@ class Tracker:
         filepath = DATA_DIR.joinpath(f"{self.name}.json")
         filepath.unlink()
 
-    def to_json(self):
-        """Convert Tracker object to JSON."""
-        return json.dumps(self, indent=4, cls=TrackerEncoder)
-
     def save(self):
         """Save the tracker to JSON."""
         DATA_DIR.mkdir(exist_ok=True)
         filepath = DATA_DIR.joinpath(f"{self.name}.json")
         filepath.touch(exist_ok=True)
-        filepath.write_text(self.to_json())
+        with filepath.open("w+") as fp:
+            data = jsonable_encoder(self)
+            json.dump(data, fp, indent=4)
 
     def modify_point(self, date_str: str, value: int):
         """Modify a point. Change its assigned value to the one given."""
@@ -80,6 +70,32 @@ class Tracker:
                 self.points.remove(point)
                 break
         self.save()
+
+    def list_points(self, start_date: datetime = None, end_date: datetime = None) -> list:
+        """
+        Return a list of all points that fall in-between the given start_date and end_date.
+
+        :param start_date: the date the data returned should start at.
+        If this is not given, it'll be a week from the given end_date.
+
+        :param end_date: the date the data returned should end at. (included in output)
+        If this is not given, it'll be today.
+
+        :return: list of all points that fall in-between the given start_date and end_date.
+
+        :raises ValueError: if either date parameter is set in the future, or if the end_date is before the start_date.
+        """
+        point_list = []
+        if end_date is None:
+            end_date = datetime.now().date()
+        if start_date is None:
+            start_date = (end_date - timedelta(days=7))  # assume we'll start a week prior to today.
+        if end_date > datetime.now().date() or start_date > datetime.now().date() or end_date < start_date:
+            raise ValueError(end_date)
+        for point in self.points:
+            if start_date <= point.datetime.date() <= end_date:
+                point_list.append(point)
+        return point_list
 
     @classmethod
     def from_data(cls, name):
