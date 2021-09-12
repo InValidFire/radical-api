@@ -27,7 +27,6 @@ def list_points(name: str, start_date=None, end_date=None, access_token: APIKey 
         end_date = datetime.fromisoformat(end_date)
     try:
         tracker = Tracker.from_data(name)
-        print(name, start_date, end_date)
         return tracker.list_points(start_date, end_date)
     except FileNotFoundError:
         return {}
