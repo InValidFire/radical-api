@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.security.api_key import APIKey
 
 import subprocess
-from security import get_system_key
+from .security import get_system_key
 
 router = APIRouter()
 
