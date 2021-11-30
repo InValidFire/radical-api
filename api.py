@@ -7,7 +7,7 @@ from fastapi import FastAPI
 logger = logging.getLogger("api")
 
 api = FastAPI()
-api_data = {"version": "2021.8.23.0", "author": "Riley Housden"}
+api_data = {"version": "2021.11.30.0", "author": "Riley Housden"}
 
 
 def load_module(name: str):
