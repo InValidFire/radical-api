@@ -1,5 +1,5 @@
-adduser --system --home /otp/radical-api --in-group radical-api radical-api
-sudo -u radical-api git clone https://gitdab.com/InValidFire/radical-api.git
+adduser --system --home /otp/radical-api --ingroup radical-api radical-api
+sudo -u radical-api git clone https://gitdab.com/InValidFire/radical-api.git /otp/radical-api
 sudo -u radical-api python3 -m pip install -r /otp/radical-api/requirements.txt
 cp radical-api.service /etc/systemd/system
 systemd enable radical-api
