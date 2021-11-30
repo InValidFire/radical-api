@@ -9,7 +9,7 @@ User=radical-api
 Group=radical-api
 Restart=on-failure
 RestartSec=20 3
-ExecStart=/usr/bin/env python /otp/radical-api/main.py
+ExecStart=/usr/bin/env python3 /otp/radical-api/main.py
 
 [Install]
 WantedBy=multi.user.target
