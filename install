@@ -1,7 +1,7 @@
 adduser --system --home /otp/radical-api radical-api
-cp -r * /otp/radical-api
-sudo -u radical-api python3 -m pip install -r /otp/radical-api/requirements.txt
-cp radical-api.service /etc/systemd/system
 addgroup --system radical-api
 adduser radical-api radical-api
+sudo -u radical-api git clone https://gitdab.com/InValidFire/radical-api.git
+sudo -u radical-api python3 -m pip install -r /otp/radical-api/requirements.txt
+cp radical-api.service /etc/systemd/system
 systemd enable radical-api
