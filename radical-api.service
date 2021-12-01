@@ -9,7 +9,7 @@ User=radical-api
 Group=radical-api
 Restart=on-failure
 RestartSec=20 3
-ExecStart=/usr/bin/env python3.9 /otp/radical-api/main.py
+ExecStart=/usr/bin/env python3.9 -m gunicorn -k uvicorn.workers.UvicornWorker --log-config log.conf --bind 0.0.0.0:8000 api:api
 
 [Install]
 WantedBy=multi.user.target
