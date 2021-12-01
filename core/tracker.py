@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from fastapi.encoders import jsonable_encoder
 from pathlib import Path
 
-DATA_DIR = Path.home().joinpath(".tracker_api/trackers")
+DATA_DIR = Path.home().joinpath(".radical-api/trackers")
 
 
 def object_hook(dct):

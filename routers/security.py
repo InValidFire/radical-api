@@ -86,6 +86,6 @@ def create_key(name, system_key: APIKey = Depends(get_system_key)):
 
 
 @router.get("/key/me")
-def key_info(api_key: APIKey = Depends(get_api_key)):
+def key_info(access_token: APIKey = Depends(get_api_key)):
     data = load_keys()
-    return data[api_key]
+    return data[access_token]
