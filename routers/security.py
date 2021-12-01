@@ -10,7 +10,7 @@ import json
 
 router = APIRouter()
 logger = logging.getLogger("security")
-ROOT_PATH = Path.home().joinpath(".tracker_api/keys")
+ROOT_PATH = Path.home().joinpath(".radical_api/keys")
 
 API_KEY_NAME = "access_token"
 
