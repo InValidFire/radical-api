@@ -25,3 +25,8 @@ for m_path in Path("routers").glob("*"):
 @api.get("/")
 def quack():
     return api_data
+
+if __name__ == "__main__":
+    import uvicorn
+    api_data["version"] += "-dev"
+    uvicorn.run(api)
