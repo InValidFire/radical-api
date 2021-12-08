@@ -5,7 +5,6 @@ import json
 
 from pathlib import Path
 from fastapi import APIRouter, Header, Query, HTTPException
-from gitea.gitea import Repository
 
 ROOT_PATH = Path.home().joinpath(".radical_api/gitea")
 
