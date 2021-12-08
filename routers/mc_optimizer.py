@@ -11,7 +11,7 @@ from starlette.responses import FileResponse
 
 
 router = APIRouter(prefix="/mc_optimizer")
-ROOT_PATH = Path.home().joinpath(".radical_api/mc_optimized")
+ROOT_PATH = Path.home().joinpath(".radical_api/mc_optimizer")
 ROOT_PATH.mkdir(exist_ok=True)
 
 class PackFile:
