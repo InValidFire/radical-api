@@ -17,18 +17,13 @@ ROOT_PATH.mkdir(exist_ok=True)
 class PackFile:
     def __init__(self, file: Path) -> None:
         self.file = file
-        self.datetime = self.set_datetime()
-        self.build = self.set_build()
-    
-    def set_datetime(self):
-        zf = ZipFile(self.file)
-        manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
-        return datetime.strptime(manifest['build-date'], "%d-%m-%Y-%H%M%S")
+        self.manifest = self.set_manifest()
+        self.datetime = datetime.strptime(self.manifest['build-date'], "%d-%m-%Y-%H%M%S")
+        self.build = self.manifest['build']
 
-    def set_build(self):
+    def set_manifest(self):
         zf = ZipFile(self.file)
-        manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
-        return manifest['build']
+        return json.loads(zf.read("manifest.json").decode("utf-8"))
 
     def __lt__(self, other: PackFile):
         return self.datetime.__lt__(other.datetime)
@@ -54,3 +49,11 @@ def get_build(build: int):
         if pf.build == build:
             return FileResponse(pf.file, filename=f"mc-optimizer-pack-{pf.build}.zip")
     raise HTTPException(404, "Build not found.")
+
+@router.get("/builds")
+def get_builds():
+    builds = []
+    for file in ROOT_PATH.iterdir():
+        pf = PackFile(file)
+        builds.append(pf.manifest)
+    return builds
