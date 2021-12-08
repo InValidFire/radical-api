@@ -10,7 +10,7 @@ import json
 from starlette.responses import FileResponse
 
 
-router = APIRouter(prefix="/mc_optimized")
+router = APIRouter(prefix="/mc_optimizer")
 ROOT_PATH = Path.home().joinpath(".radical_api/mc_optimized")
 ROOT_PATH.mkdir(exist_ok=True)
 
