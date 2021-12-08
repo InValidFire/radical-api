@@ -32,7 +32,7 @@ def iterfile(path: Path):
         with path.open('rb') as fp:
             yield from fp
 
-@router.get("/latest")
+@router.get("/download/latest")
 def latest_pack():
     files = []
     for file in ROOT_PATH.iterdir():
@@ -42,7 +42,7 @@ def latest_pack():
         raise HTTPException(404, "No files found.")
     return FileResponse(files[-1].file, filename=f"mc-optimizer-pack-{files[-1].build}.zip")
 
-@router.get("/build")
+@router.get("/download/build")
 def get_build(build: int):
     for file in ROOT_PATH.iterdir():
         pf = PackFile(file)
@@ -50,7 +50,17 @@ def get_build(build: int):
             return FileResponse(pf.file, filename=f"mc-optimizer-pack-{pf.build}.zip")
     raise HTTPException(404, "Build not found.")
 
-@router.get("/builds")
+@router.get("/manifest/latest")
+def get_latest_manifest():
+    files = []
+    for file in ROOT_PATH.iterdir():
+        files.append(PackFile(file))
+    files.sort()
+    if len(files) == 0:
+        raise HTTPException(404, "No files found.")
+    return files[-1].manifest
+
+@router.get("/manifest/builds")
 def get_builds():
     builds = []
     for file in ROOT_PATH.iterdir():
