@@ -1,5 +1,6 @@
 import importlib
 import logging
+import platform
 
 from pathlib import Path
 from fastapi import FastAPI
@@ -19,7 +20,10 @@ def load_module(name: str):
 for m_path in Path("routers").glob("*"):
     if "__pycache__" in m_path.parts or "__init__" == m_path.stem:
         continue
-    load_module(str(m_path).replace("/", ".").replace(".py", ""))
+    if platform.system() != "Windows":
+        load_module(str(m_path).replace("/", ".").replace(".py", ""))
+    else:
+        load_module(str(m_path).replace("\\", ".").replace(".py", ""))
 
 
 @api.get("/")
