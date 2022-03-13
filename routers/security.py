@@ -3,14 +3,14 @@ from fastapi.security.api_key import APIKeyQuery, APIKeyCookie, APIKeyHeader, AP
 
 from starlette.status import HTTP_403_FORBIDDEN
 
-from pathlib import Path
 import logging
 import uuid
-import json
+
+from core.storage import Storage
 
 router = APIRouter()
 logger = logging.getLogger("security")
-ROOT_PATH = Path.home().joinpath(".radical_api/keys")
+storage = Storage("security")
 
 API_KEY_NAME = "access_token"
 
@@ -18,24 +18,17 @@ api_key_query = APIKeyQuery(name=API_KEY_NAME, auto_error=False)
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 api_key_cookie = APIKeyCookie(name=API_KEY_NAME, auto_error=False)
 
-system_key_path = ROOT_PATH.joinpath("system_key")
-if not system_key_path.exists():
+try:
+    system_key = storage.read_file("system_key.json")["system_key"]
+except FileNotFoundError:
     logger.info("System Key not found, generating.")
-    system_key_path.parent.mkdir(parents=True, exist_ok=True)
-    system_key_path.touch()
     system_uuid = str(uuid.uuid4())
-    system_key_path.write_text(system_uuid)
+    storage.write_file("system_key.json", {"system_key": system_uuid})
     logger.info(f"System UUID: {system_uuid}")
 
 
 def load_keys():
-    path = ROOT_PATH.joinpath("api_keys.json")
-    if not path.exists():
-        path.touch()
-        path.write_text("{}")
-    with path.open("r") as f:
-        data = json.load(f)
-    return data
+    return storage.read_file("api_keys.json")
 
 
 def get_system_key(
@@ -43,12 +36,12 @@ def get_system_key(
         api_key_header: str = Security(api_key_header),
         api_key_cookie: str = Security(api_key_cookie)
 ):
-    path = ROOT_PATH.joinpath("system_key")
-    if api_key_query == path.read_text():
+    system_key
+    if api_key_query == system_key:
         return api_key_query
-    elif api_key_header == path.read_text():
+    elif api_key_header == system_key:
         return api_key_header
-    elif api_key_cookie == path.read_text():
+    elif api_key_cookie == system_key:
         return api_key_cookie
     else:
         raise HTTPException(
@@ -75,13 +68,11 @@ def get_api_key(
 
 @router.get("/key/create")
 def create_key(name, system_key: APIKey = Depends(get_system_key)):
-    keys: dict = load_keys()
+    keys: dict = storage.read_file("api_keys.json")
     new_key = str(uuid.uuid4())
     keys[new_key] = {}
     keys[new_key]["name"] = name
-    path = ROOT_PATH.joinpath("api_keys.json")
-    with path.open("w") as f:
-        json.dump(keys, f, indent=4, sort_keys=True)
+    storage.write_file("api_keys.json", keys)
     return new_key
 
 

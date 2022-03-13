@@ -1,10 +1,10 @@
 import json
 from datetime import datetime, timedelta
 from fastapi.encoders import jsonable_encoder
-from pathlib import Path
 
-DATA_DIR = Path.home().joinpath(".radical-api/trackers")
+from core.storage import Storage
 
+storage = Storage("trackers")
 
 def object_hook(dct):
     if "datetime" in dct:
@@ -28,24 +28,13 @@ class Tracker:
 
     def rename(self, name):
         """Rename the Tracker."""
-        DATA_DIR.joinpath(f"{self.name}.json").rename(
-            DATA_DIR.joinpath(f"{name}.json"))
+        storage.rename_file(f"{self.name}.json", f"{name}.json")
         self.name = name
-        self.save()
+        storage.write_file(f"{self.name}.json", jsonable_encoder(self))
 
     def delete(self):
         """Delete the Tracker."""
-        filepath = DATA_DIR.joinpath(f"{self.name}.json")
-        filepath.unlink()
-
-    def save(self):
-        """Save the tracker to JSON."""
-        DATA_DIR.mkdir(exist_ok=True)
-        filepath = DATA_DIR.joinpath(f"{self.name}.json")
-        filepath.touch(exist_ok=True)
-        with filepath.open("w+") as fp:
-            data = jsonable_encoder(self)
-            json.dump(data, fp, indent=4)
+        storage.delete_file(f"{self.name}.json")
 
     def modify_point(self, date_str: str, value: int):
         """Modify a point. Change its assigned value to the one given."""
@@ -54,13 +43,13 @@ class Tracker:
             if point.datetime == date_time:
                 point.value = value
                 break
-        self.save()
+        storage.write_file(f"{self.name}.json", jsonable_encoder(self))
 
     def add_point(self, date_str: str, value: int):
         """Add a point to the tracker."""
         point = TrackerPoint(date_str, value)
         self.points.append(point)
-        self.save()
+        storage.write_file(f"{self.name}.json", jsonable_encoder(self))
 
     def delete_point(self, date_str: str):
         """Remove a point from the tracker."""
@@ -69,7 +58,7 @@ class Tracker:
             if point.datetime == date_time:
                 self.points.remove(point)
                 break
-        self.save()
+        storage.write_file(f"{self.name}.json", jsonable_encoder(self))
 
     def list_points(self, start_date: datetime = None, end_date: datetime = None) -> list:
         """
@@ -100,10 +89,10 @@ class Tracker:
     @classmethod
     def from_data(cls, name):
         """Load a tracker from the DATA_DIR."""
-        filepath = DATA_DIR.joinpath(f"{name}.json")
-        return cls.from_json(filepath.read_text())
+        data = storage.read_file(f"{name}.json")
+        return cls.from_json(data)
 
     @staticmethod
     def from_json(json_str):
         """Load a tracker from a JSON string."""
-        return json.loads(json_str, object_hook=object_hook)
+        return json.load(json_str, object_hook=object_hook)

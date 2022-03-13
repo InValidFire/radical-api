@@ -1,20 +1,19 @@
 import logging
 from typing import Optional
 import giteapy
-import json
 
-from pathlib import Path
 from fastapi import APIRouter, Header, Query, HTTPException
 
-ROOT_PATH = Path.home().joinpath(".radical_api/gitea")
+from core.storage import Storage
+
+storage = Storage("gitea")
 
 logger = logging.getLogger("gitea")
 router = APIRouter()
 
 @router.get("/gitea/latest")
 def get_latest_version(base_url: Optional[str] = Header(None), author: str = Query(None), repo: str = Query(None), pre_releases: bool = Query(False)):
-    with ROOT_PATH.joinpath("keys.json").open("r") as fp:
-        data: dict = json.load(fp)
+    data = storage.read_file("keys.json")
     if base_url in data.keys():
         config = giteapy.Configuration()
         config.api_key['access_token'] = data[base_url]
